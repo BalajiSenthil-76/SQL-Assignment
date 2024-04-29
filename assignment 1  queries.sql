@@ -1,0 +1,282 @@
+use techshop;
+
+UPDATE products
+SET price = CASE
+    WHEN productid = 6501 THEN 1299.99
+    WHEN productid = 6502 THEN 899.50
+    WHEN productid = 6503 THEN 149.95
+    WHEN productid = 6504 THEN 1999.99
+    WHEN productid = 6505 THEN 8450.75
+    WHEN productid = 6506 THEN 799.00
+    WHEN productid = 6507 THEN 9950.99
+    WHEN productid = 6508 THEN 10549.50
+    WHEN productid = 6509 THEN 799.95
+    WHEN productid = 6510 THEN 390.99
+    ELSE price
+END;
+select* from products;
+
+-- ------------------------------TASK 2 ----------------------------------------------- 
+-- 1.query to retrieve the names and emails of all customers.
+select firstname,lastname,email from customers;
+
+-- 2.query to list all orders with their order dates and corresponding customer 
+-- names.
+select o.orderid,o.orderdate,concat(c.firstname,' ',c.lastname) as customername
+from orders o inner join  customers c on o.customerID=c.customerID;
+
+-- 3.query to insert a new customer record into the "Customers" table. Include 
+-- customer information such as name, email, and address.
+select*from customers;
+insert into customers(customerID,firstname,lastname,email,phone,address)
+value(111,'bhavan','R','bbji691@gail.com','9208793261','96,4 Dass theatre harur');
+select*from customers;
+
+-- 4.query to update the prices of all electronic gadgets in the "Products" table by 
+-- increasing them by 10%.
+
+update products
+set price=price+((price*10)/100);
+select price from products;
+
+-- 5. query to delete a specific order and its associated order details from the 
+-- "Orders" and "OrderDetails" tables. Allow users to input the order ID as a parameter
+delete from orderdetailscopy  where orderid=9;
+delete from orderscopy  where orderid=9;
+ select* from orderdetailscopy;
+ select*from orderscopy;
+
+
+-- 6.query to insert a new order into the "Orders" table. Include the customer ID, 
+-- order date, and any other necessary information
+
+insert into orders(customerID,orderdate, totalamount)
+value(112,'2024-04-24',230.00);
+select*from orders;
+
+-- 7.query to update the contact information (e.g., email and address) of a specific 
+-- customer in the "Customers" table. Allow users to input the customer ID and new contact 
+-- information  
+       insert into customers(customerID,firstname,lastname,email,phone,address)
+value(112,'Srini','V','srini45@gail.com','925623261','45,12 periyar nagar harur');
+select*from customers;
+
+ -- 8.query to recalculate and update the total cost of each order in the "Orders" 
+-- table based on the prices and quantities in the "OrderDetails" table.
+select* from orders;
+update orders
+set orders.totalamount = (
+select sum(orderdetails.quantity*products.price) from orderdetails
+inner join products on orderdetails.Productid = products.Productid
+where orderdetails.OrderID = orders.OrderID
+);
+
+
+-- 9.query to delete all orders and their associated order details for a specific 
+-- customer from the "Orders" and "OrderDetails" tables. Allow users to input the customer ID 
+-- as a parameter.
+delete from orderdetailscopy  where customerid=105;
+delete from orderscopy  where customerid=105;
+ select* from orderdetailscopy;
+ select*from orderscopy;
+
+
+-- 10.L query to insert a new electronic gadget product into the "Products" table, 
+-- including product name, category, price, and any other relevant details.
+select* from products;
+insert into products(productid,productname,description,price)
+value(6511, 'earphone','braided earphone cable ', 560.50);
+select* from products;
+
+-- 11.query to update the status of a specific order in the "Orders" table (e.g., from 
+-- "Pending" to "Shipped"). Allow users to input the order ID and the new status
+
+ALTER TABLE Orders
+ADD COLUMN status VARCHAR(50);
+Update Orders
+Set status = CASE 
+    WHEN Orderid = 1 THEN 'pending'
+    WHEN OrderID = 2 THEN 'shipped'
+    WHEN OrderID = 3 THEN 'delivered'
+    WHEN OrderID = 4 THEN 'dispatched'
+    WHEN OrderID = 5 THEN 'pending'
+    WHEN OrderID = 6 THEN 'shipped'
+    WHEN OrderID = 7 THEN 'delivered'
+    WHEN OrderID = 8 THEN 'dispatched'
+    WHEN OrderID = 9 THEN 'pending'
+    WHEN OrderID = 10 THEN 'shipped'
+   
+END;
+
+
+
+
+update orders set status = "pending" where OrderID = 9;
+
+
+-- 12. query to calculate and update the number of orders placed by each customer 
+-- in the "Customers" table based on the data in the "Orders" table.
+alter table customers
+add column orderscount int; 
+
+update Customers as c
+set orderscount = (
+    select COUNT(*)
+    from Orders as o
+    where o.customerid = c.customerid
+);
+
+
+
+
+-- ------------------------------TASK 3 ----------------------------------------------- 
+
+--   query 1  to retrieve a list of all orders along with customer information
+select c.customerID,concat(c.firstname,' ',c.lastname),o.orderid,email,phone,o.orderdate,totalamount
+from customers c inner join orders o  on c.customerID=o.customerID;
+
+-- query to find the total revenue generated by each electronic gadget product. 
+-- Include the product name and the total revenue
+select p.productid,productname,price,sum(od.quantity),sum(p.price*od.quantity) 'Total revenue' 
+from products p inner join orderdetails od on p.productid=od.productid
+group by p.productid,productname,price;
+
+-- query to list all customers who have made at least one purchase. Include their 
+-- names and contact information.
+select COUNT(c.customerID) AS order_count, 
+       CONCAT(c.firstname,' ', c.lastname) AS customer_name, 
+       o.orderid, 
+       c.email, 
+       c.phone
+from customers c 
+INNER JOIN orders o ON c.customerID = o.customerID
+GROUP BY c.customerID, c.firstname, c.lastname, o.orderid, c.email, c.phone
+HAVING order_count >= 1;
+
+-- query to find the most popular electronic gadget, which is the one with the highest 
+-- total quantity ordered. Include the product name and the total quantity ordered.
+
+select p.productid,productname,max(od.quantity), productname as 'popular product' 
+from products p inner join orderdetails od on p.productid=od.productid
+group by p.productid,productname
+having max(od.quantity)>=9;
+
+-- query to retrieve a list of electronic gadgets along with their corresponding 
+-- categories.
+select * from products;
+
+-- query to calculate the average order value for each customer. Include the 
+-- customer's name and their average order value.
+select*from orderdetails;
+
+select c.customerID,concat(c.firstname,' ',c.lastname) as 'customer_name',count(c.customerID) as 'total_orders',(sum(o.totalamount)/count(c.customerID)) as 'avg value'
+from customers c inner join orders o on c.customerID =o.customerID
+group by c.customerID,c.firstname,c.lastname;
+
+-- query to find the order with the highest total revenue. Include the order ID, 
+-- customer information, and the total revenue
+select o.orderID,concat(c.firstname,' ',c.lastname) as 'customer_name',c.customerID,c.phone,o.totalamount as 'revenue' 
+from customers c inner join orders o on c.customerID =o.customerID
+ WHERE o.totalamount = (select max(totalamount)from orders);
+ 
+ --  query to list electronic gadgets and the number of times each product has been 
+-- ordered
+select p.productid,productname,count(od.productid) as'No od times ordered'  
+from products p inner join orderdetails od on p.productid=od.productid
+group by p.productid,productname;
+
+-- query to find customers who have purchased a specific electronic gadget product. 
+-- Allow users to input the product name as a parameter.
+select c.customerID,concat(c.firstname,' ',c.lastname) as 'customer_name',p.productid,p.productname
+from products p inner join orderdetails od on p.productid = od.productid 
+inner join orders o on od.orderid=o.orderid
+inner join customers c on o.customerID=c.customerID
+where p.productname='Laptop';
+
+-- SQL query to calculate the total revenue generated by all orders placed within a 
+-- specific time period. Allow users to input the start and end dates as parameters.
+select SUM(totalamount) as total_revenue
+from orders
+where orderdate between '2024-04-01' and '2024-04-06';
+
+-- ------------------------------TASK 4 ----------------------------------------------- 
+-- 1.SQL query to find out which customers have not placed any order
+SELECT * from customers c
+left join orders o on o.customerID = c.customerID
+where o.customerID is null; 
+
+-- 2.SQL query to find the total number of products available for sale.
+select 
+    (select SUM(quantityinStock) from inventory) as 'Total no. of products';
+
+
+-- 3.an SQL query to calculate the total revenue generated by TechShop.
+select 
+    (select SUM(totalamount) from orders) as 'Total Revenue Generated by TechShop';
+    
+-- 4.SQL query to calculate the average quantity ordered for products in a specific category. Allow users to input the category name as a parameter.
+
+select p.ProductID,p.productname,avg(od.Quantity)
+from orderdetails od join products p on od.ProductID = p.ProductID
+where p.ProductName = 'laptop'
+group by p.ProductID;
+
+
+
+-- 5.SQL query to calculate the total revenue generated by a specific customer
+select
+    (select SUM(totalamount)
+     from orders o
+     where o.customerID = c.customerID
+    ) as 'Total Revenue Generated by Reenu M'
+from customers c
+where CONCAT(c.firstname, ' ', c.lastname) = 'Reenu M';
+
+-- 6.query to find the customers who have placed the most orders. List their names 
+-- and the number of orders they've placed
+
+select c.FirstName,c.LastName,COUNT(o.customerID) AS Numberoforders
+from Customers c
+join Orders o on c.customerID = o.customerID
+group by c.FirstName,c.LastName
+order by numberoforders desc;
+
+-- 7.SQL query to find the most popular product category, which is the one with the highest total quantity ordered across all orders.
+
+ select p.productname , p.productid , max(od.quantity) as totalorders
+ from orderdetails od join products p on od.productid=p.productid
+ group by p.productname , p.productid
+ order by totalorders desc
+ limit 1;
+ 
+ 
+-- 8. query to find the customer who has spent the most money (highest total revenue) on electronic gadgets. List their name and total spending.
+
+select CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName, SUM(o.TotalAmount) AS 'TotalSpending in dollars'
+from Customers c
+join Orders o on c.customerID = o.customerID
+join OrderDetails od on o.orderid = od.orderid
+join Products p on od.productid = p.productid
+group by c.customerID
+order by TotalSpending desc
+limit 1;
+
+-- 9.SQL query to calculate the average order value (total revenue divided by the number of orders) for all customers.
+
+SELECT o.customerID,CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,AVG(o.TotalAmount) AS AverageOrderValue
+FROM Orders o join customers c on o.customerid=c.CustomerID
+group by c.CustomerID
+order by AverageOrderValue desc;
+
+-- 10.query to find the total number of orders placed by each customer and list their names along with the order count.
+select CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName, count(o.orderid) as ordercount
+ FROM Orders o join customers c on o.customerid=c.CustomerID
+ group by CustomerName
+ order by ordercount desc;
+
+
+
+
+
+
+
